@@ -5,6 +5,7 @@
 
 #include "Op.h"
 #include "Value.h"
+#include "panics.h"
 
 typedef struct smollisp_Frame {
   size_t stack_length;
@@ -19,15 +20,13 @@ void smollisp_Frame_new(smollisp_Frame *frame) {
 }
 
 void smollisp_Frame_push(smollisp_Frame *frame, smollisp_Value mov_value) {
-  if (frame->stack_length >= frame->stack_capacity)
-    abort();
+  SMOLLISP_ASSERT(frame->stack_length < frame->stack_capacity);
 
   frame->stack[frame->stack_length++] = mov_value;
 }
 
 smollisp_Value smollisp_Frame_pop(smollisp_Frame *frame) {
-  if (frame->stack_length <= 0)
-    abort();
+  SMOLLISP_ASSERT(frame->stack_length > 0);
 
   return frame->stack[frame->stack_length-- - 1];
 }
@@ -44,8 +43,7 @@ void smollisp_Frame_do_op(smollisp_Frame *frame, smollisp_Op op) {
   } break;
 
   default:
-    // Unreachable
-    abort();
+    SMOLLISP_UNREACHABLE;
   }
 }
 
