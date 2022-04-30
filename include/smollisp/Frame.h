@@ -20,7 +20,10 @@ void smollisp_Frame_new(smollisp_Frame *frame) {
   frame->stack = (smollisp_Value *)malloc(sizeof(smollisp_Value) * 16);
 }
 
-void smollisp_Frame_destroy(smollisp_Frame *frame) { /* TODO */
+void smollisp_Frame_destroy(smollisp_Frame *frame) {
+  for (int i = 0; i < frame->stack_length; i++)
+    smollisp_Value_destroy(&frame->stack[i]);
+  free(frame->stack);
 }
 
 void smollisp_Frame_push(smollisp_Frame *frame, smollisp_Value mov_value) {
