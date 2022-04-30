@@ -33,7 +33,7 @@ smollisp_Value smollisp_Frame_pop(smollisp_Frame *frame) {
 
 void smollisp_Frame_do_op(smollisp_Frame *frame, smollisp_Op op) {
   switch (op) {
-  case SMOLLISP_OP_ADD_UNCHECKED: {
+  case SMOLLISP_OP_ADD: {
     smollisp_Value a = smollisp_Frame_pop(frame);
     smollisp_Value b = smollisp_Frame_pop(frame);
     smollisp_Value out;

@@ -16,7 +16,7 @@ int main(void) {
   smollisp_Frame *frame = smollisp_VM_get_top_frame(&vm);
   smollisp_Frame_push(frame, i_16); // i_16 moved
   smollisp_Frame_push(frame, i_32); // i_32 moved
-  smollisp_Frame_do_op(frame, SMOLLISP_OP_ADD_UNCHECKED);
+  smollisp_Frame_do_op(frame, SMOLLISP_OP_ADD);
 
   printf("%d\n", frame->stack[0].int32);
   return 0;

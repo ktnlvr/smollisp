@@ -2,7 +2,7 @@
 #define SMOLLISP_H__OP
 
 typedef enum smollisp_Op {
-    SMOLLISP_OP_ADD_UNCHECKED,
+  SMOLLISP_OP_ADD,
 } smollisp_Op;
 
 #endif
