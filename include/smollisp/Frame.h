@@ -31,15 +31,41 @@ smollisp_Value smollisp_Frame_pop(smollisp_Frame *frame) {
   return frame->stack[frame->stack_length-- - 1];
 }
 
+void smollisp_Frame__do_add(smollisp_Frame *frame) {
+  /* TODO: handle stack overflow and underflow */
+  SMOLLISP_ASSERT(frame->stack_length >= 2);
+
+  /* x1 x2 -- x3 */
+  smollisp_Value x1 = smollisp_Frame_pop(frame);
+  smollisp_Value x2 = smollisp_Frame_pop(frame);
+  smollisp_Value x3;
+
+  switch (x1.kind) {
+  case SMOLLISP_VALUE_KIND_INT32: {
+    switch (x2.kind) {
+    case SMOLLISP_VALUE_KIND_INT32:
+      smollisp_Value_new_int32(&x3, x1.int32 + x2.int32);
+      smollisp_Frame_push(frame, x3);
+      break;
+
+    case SMOLLISP_VALUE_KIND_NONE:
+    /* TODO: raise type error for types which cannot be added */
+    default:
+      SMOLLISP_UNREACHABLE;
+    }
+  } break;
+
+  case SMOLLISP_VALUE_KIND_NONE:
+    /* TODO: raise type error for types which cannot be added */
+  default:
+    SMOLLISP_UNREACHABLE;
+  }
+}
+
 void smollisp_Frame_do_op(smollisp_Frame *frame, smollisp_Op op) {
   switch (op) {
   case SMOLLISP_OP_ADD: {
-    smollisp_Value a = smollisp_Frame_pop(frame);
-    smollisp_Value b = smollisp_Frame_pop(frame);
-    smollisp_Value out;
-
-    smollisp_Value_new_int32(&out, a.int32 + b.int32);
-    smollisp_Frame_push(frame, out);
+    smollisp_Frame__do_add(frame);
   } break;
 
   default:
