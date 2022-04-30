@@ -20,7 +20,8 @@ void smollisp_Frame_new(smollisp_Frame *frame) {
   frame->stack = (smollisp_Value *)malloc(sizeof(smollisp_Value) * 16);
 }
 
-void smollisp_Frame_destroy(smollisp_Frame *frame) { /* TODO */ }
+void smollisp_Frame_destroy(smollisp_Frame *frame) { /* TODO */
+}
 
 void smollisp_Frame_push(smollisp_Frame *frame, smollisp_Value mov_value) {
   SMOLLISP_ASSERT(frame->stack_length < frame->stack_capacity);
@@ -47,7 +48,6 @@ smollisp_Value smollisp_Frame_pop(smollisp_Frame *frame) {
 }
 
 smollisp_Result smollisp_Frame__do_add(smollisp_Frame *frame) {
-  /* TODO: handle stack overflow and underflow */
   if (frame->stack_length < 2)
     return SMOLLISP_RESULT_STACK_UNDERFLOW;
 
@@ -61,10 +61,28 @@ smollisp_Result smollisp_Frame__do_add(smollisp_Frame *frame) {
     switch (x2.kind) {
     case SMOLLISP_VALUE_KIND_INT32:
       smollisp_Value_new_int32(&x3, x1.int32 + x2.int32);
-      smollisp_Frame_push(frame, x3);
       break;
 
     case SMOLLISP_VALUE_KIND_NONE:
+    case SMOLLISP_VALUE_KIND_STRING:
+    default:
+      return SMOLLISP_RESULT_TYPE_MISMATCH;
+    }
+  } break;
+
+  case SMOLLISP_VALUE_KIND_STRING: {
+    switch (x2.kind) {
+    case SMOLLISP_VALUE_KIND_STRING: {
+      char *mov_str = (char *)malloc(sizeof(char) *
+                                     (x1.string.length + x2.string.length + 1));
+      memcpy(mov_str, x1.string.buf, sizeof(char) * x1.string.length);
+      memcpy(&mov_str[x1.string.length], x2.string.buf,
+             sizeof(char) * x2.string.length);
+      smollisp_Value_new_string_mov(&x3, mov_str);
+    } break;
+
+    case SMOLLISP_VALUE_KIND_NONE:
+    case SMOLLISP_VALUE_KIND_INT32:
     default:
       return SMOLLISP_RESULT_TYPE_MISMATCH;
     }
@@ -76,6 +94,8 @@ smollisp_Result smollisp_Frame__do_add(smollisp_Frame *frame) {
   default:
     SMOLLISP_UNREACHABLE;
   }
+
+  smollisp_Frame_push(frame, x3);
 
   return SMOLLISP_RESULT_OK;
 }
