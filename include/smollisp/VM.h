@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "Frame.h"
+#include "Result.h"
 #include "panics.h"
 
 typedef struct smollisp_VM {
@@ -20,6 +21,10 @@ void smollisp_VM_new(smollisp_VM *vm) {
 
 void smollisp_VM_begin_frame(smollisp_VM *vm) {
   smollisp_Frame_new(&vm->frames[vm->frames_length++]);
+}
+
+void smollisp_VM_end_frame(smollisp_VM* vm) {
+  smollisp_Frame_destroy(&vm->frames[vm->frames_length--]);
 }
 
 smollisp_Frame *smollisp_VM_get_top_frame(smollisp_VM *vm) {

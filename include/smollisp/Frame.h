@@ -20,10 +20,24 @@ void smollisp_Frame_new(smollisp_Frame *frame) {
   frame->stack = (smollisp_Value *)malloc(sizeof(smollisp_Value) * 16);
 }
 
+void smollisp_Frame_destroy(smollisp_Frame *frame) { /* TODO */ }
+
 void smollisp_Frame_push(smollisp_Frame *frame, smollisp_Value mov_value) {
   SMOLLISP_ASSERT(frame->stack_length < frame->stack_capacity);
 
   frame->stack[frame->stack_length++] = mov_value;
+}
+
+smollisp_Result smollisp_Frame_return(smollisp_Frame *return_from,
+                                      uint16_t return_num,
+                                      smollisp_Frame *return_into) {
+  SMOLLISP_ASSERT(return_from->stack_length >= return_num);
+
+  for (int i = 0; i < return_num; i++)
+    smollisp_Frame_push(return_into,
+                        return_from->stack[return_from->stack_length-- - 1]);
+
+  return SMOLLISP_RESULT_OK;
 }
 
 smollisp_Value smollisp_Frame_pop(smollisp_Frame *frame) {
