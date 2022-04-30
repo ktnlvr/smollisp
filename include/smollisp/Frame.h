@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "Op.h"
+#include "Result.h"
 #include "Value.h"
 #include "panics.h"
 
@@ -31,9 +32,10 @@ smollisp_Value smollisp_Frame_pop(smollisp_Frame *frame) {
   return frame->stack[frame->stack_length-- - 1];
 }
 
-void smollisp_Frame__do_add(smollisp_Frame *frame) {
+smollisp_Result smollisp_Frame__do_add(smollisp_Frame *frame) {
   /* TODO: handle stack overflow and underflow */
-  SMOLLISP_ASSERT(frame->stack_length >= 2);
+  if (frame->stack_length < 2)
+    return SMOLLISP_RESULT_STACK_UNDERFLOW;
 
   /* x1 x2 -- x3 */
   smollisp_Value x1 = smollisp_Frame_pop(frame);
@@ -49,28 +51,34 @@ void smollisp_Frame__do_add(smollisp_Frame *frame) {
       break;
 
     case SMOLLISP_VALUE_KIND_NONE:
-    /* TODO: raise type error for types which cannot be added */
     default:
-      SMOLLISP_UNREACHABLE;
+      return SMOLLISP_RESULT_TYPE_MISMATCH;
     }
   } break;
 
   case SMOLLISP_VALUE_KIND_NONE:
-    /* TODO: raise type error for types which cannot be added */
+    return SMOLLISP_RESULT_TYPE_MISMATCH;
+
   default:
     SMOLLISP_UNREACHABLE;
   }
+
+  return SMOLLISP_RESULT_OK;
 }
 
-void smollisp_Frame_do_op(smollisp_Frame *frame, smollisp_Op op) {
+smollisp_Result smollisp_Frame_do_op(smollisp_Frame *frame, smollisp_Op op) {
+  smollisp_Result ret;
+
   switch (op) {
   case SMOLLISP_OP_ADD: {
-    smollisp_Frame__do_add(frame);
+    ret = smollisp_Frame__do_add(frame);
   } break;
 
   default:
     SMOLLISP_UNREACHABLE;
   }
+
+  return ret;
 }
 
 #endif
