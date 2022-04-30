@@ -1,1 +1,1 @@
-make && ./build/main
+make && lldb ./build/main
