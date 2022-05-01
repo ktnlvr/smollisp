@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "panics.h"
+
 #define SMOLLISP_SMALL_STRING_LENGTH (15)
 
 typedef enum smollisp_ValueKind {
@@ -40,10 +42,26 @@ void smollisp_Value_new_string(smollisp_Value *value, const char *cstr) {
   value->string.length = len;
 }
 
-void smollisp_Value_new_string_mov(smollisp_Value* value, char* mov_cstr) {
+void smollisp_Value_new_string_mov(smollisp_Value *value, char *mov_cstr) {
   value->kind = SMOLLISP_VALUE_KIND_STRING;
   value->string.buf = mov_cstr;
   value->string.length = strlen(value->string.buf);
+}
+
+void smollisp_Value_copy(smollisp_Value *from, smollisp_Value *into) {
+  switch (from->kind) {
+  case SMOLLISP_VALUE_KIND_INT32:
+    smollisp_Value_new_int32(into, from->int32);
+    break;
+  case SMOLLISP_VALUE_KIND_NONE:
+    smollisp_Value_new_none(into);
+    break;
+  case SMOLLISP_VALUE_KIND_STRING:
+    smollisp_Value_new_string(into, from->string.buf);
+    break;
+  default:
+    SMOLLISP_UNREACHABLE;
+  }
 }
 
 void smollisp_Value_destroy(smollisp_Value *value) {

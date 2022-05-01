@@ -37,17 +37,26 @@ int main(void) {
   result = smollisp_Frame_do_op(frame1, SMOLLISP_OP_ADD);
   SMOLLISP_ASSERT(result == SMOLLISP_RESULT_OK);
 
-  printf("%d\n", frame1->stack[0].int32);
-
   smollisp_Value string_1;
   smollisp_Value_new_string(&string_1, "Hello");
 
   smollisp_Value string_2;
   smollisp_Value_new_string(&string_2, ", world!");
 
-  smollisp_Frame_push(frame1, string_1); // string_1 moved
-  smollisp_Frame_push(frame1, string_2); // string_2 moved
+  smollisp_Frame_push(frame1, string_1);         // string_1 moved
+  smollisp_Frame_push(frame1, string_2);         // string_2 moved
   smollisp_Frame_do_op(frame1, SMOLLISP_OP_ADD); // concat strings
+
+  smollisp_Value v;
+  smollisp_Value_new_int32(&v, 4);
+  smollisp_Context_define_var(frame1->ctx, ", world!Hello", v); // v moved
+
+  result = smollisp_Frame_do_op(frame1, SMOLLISP_OP_LOOKUP);
+  SMOLLISP_ASSERT(result == SMOLLISP_RESULT_OK);
+  result = smollisp_Frame_do_op(frame1, SMOLLISP_OP_ADD);
+  SMOLLISP_ASSERT(result == SMOLLISP_RESULT_OK);
+
+  printf("%d\n", frame1->stack[0].int32);
 
   smollisp_VM_end_frame(&vm);
 

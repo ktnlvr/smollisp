@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 
+#include "Context.h"
 #include "Op.h"
 #include "Result.h"
 #include "Value.h"
@@ -12,18 +13,23 @@ typedef struct smollisp_Frame {
   size_t stack_length;
   size_t stack_capacity;
   smollisp_Value *stack;
+  smollisp_Context *ctx;
 } smollisp_Frame;
 
 void smollisp_Frame_new(smollisp_Frame *frame) {
   frame->stack_length = 0;
   frame->stack_capacity = 16;
   frame->stack = (smollisp_Value *)malloc(sizeof(smollisp_Value) * 16);
+
+  frame->ctx = (smollisp_Context *)malloc(sizeof(smollisp_Context));
+  smollisp_Context_new(frame->ctx);
 }
 
 void smollisp_Frame_destroy(smollisp_Frame *frame) {
   for (int i = 0; i < frame->stack_length; i++)
     smollisp_Value_destroy(&frame->stack[i]);
   free(frame->stack);
+  free(frame->ctx);
 }
 
 void smollisp_Frame_push(smollisp_Frame *frame, smollisp_Value mov_value) {
@@ -109,6 +115,19 @@ smollisp_Result smollisp_Frame_do_op(smollisp_Frame *frame, smollisp_Op op) {
   switch (op) {
   case SMOLLISP_OP_ADD: {
     ret = smollisp_Frame__do_add(frame);
+  } break;
+
+  case SMOLLISP_OP_LOOKUP: {
+    /* x1:string -- x2 */
+    if (frame->stack_length < 2)
+      return SMOLLISP_RESULT_STACK_UNDERFLOW;
+
+    smollisp_Value x1 = smollisp_Frame_pop(frame);
+    SMOLLISP_ASSERT(x1.kind == SMOLLISP_VALUE_KIND_STRING);
+
+    smollisp_Value x2;
+    ret = smollisp_Context_lookup(frame->ctx, x1.string.buf, &x2);
+    smollisp_Frame_push(frame, x2);
   } break;
 
   default:
